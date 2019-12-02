@@ -15,7 +15,7 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent   : public OpenGLAppComponent
+class MainComponent : public OpenGLAppComponent
 {
 public:
     //==============================================================================
@@ -35,7 +35,22 @@ private:
     //==============================================================================
     // Your private member variables go here...
 
-    OpenGLShaderProgram shaderProgram;
+    struct Vertex2f
+    {
+        Vertex2f()
+        {}
+
+        Vertex2f(GLfloat _x, GLfloat _y)
+            : x(_x), y(_y)
+        {}
+
+        GLfloat x = 0, y = 0;
+    };
+
+    OpenGLShaderProgram* shaderProgram = nullptr;
+    GLuint vertexBuffer = 0;
+    GLuint VAO = 0;
+    bool isProgramReady = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

@@ -4,7 +4,6 @@ out vec2 waveformUV;
 
 void main()
 {
-   waveformUV.x = (in_position.x + 1.0) * 0.5;
-   waveformUV.y = in_position.y;
+   waveformUV = (in_position + 1.0) * 0.5;
    gl_Position = vec4(in_position, 0.0, 1.0);
 }

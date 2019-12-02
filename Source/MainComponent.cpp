@@ -26,14 +26,51 @@ MainComponent::~MainComponent()
 void MainComponent::initialise()
 {
     // Initialise GL objects for rendering here.
-    shaderProgram.addVertexShader();
-    shaderProgram.addFragmentShader();
+
+    openGLContext.setOpenGLVersionRequired(OpenGLContext::OpenGLVersion::defaultGLVersion);
+    openGLContext.extensions.initialise();
+
+    auto ver = glGetString(GL_VERSION);
+
+    shaderProgram = new OpenGLShaderProgram(openGLContext);
+    
+    File myDir(File::getSpecialLocation(File::currentExecutableFile));
+    
+    File vsFile(myDir.getParentDirectory().getFullPathName() + "/Shaders/Vertex.vert");
+    shaderProgram->addVertexShader(vsFile.loadFileAsString());
+    
+    File fsFile(myDir.getParentDirectory().getFullPathName() + "/Shaders/Fragment.frag");
+    shaderProgram->addFragmentShader(fsFile.loadFileAsString());
+
+    isProgramReady = shaderProgram->link();
+    if (!isProgramReady) return;
+
+    Vertex2f verts[4] =
+    {
+        Vertex2f(-1.f, -1.f),
+        Vertex2f(1.f, -1.f),
+        Vertex2f(1.f, 1.f),
+        Vertex2f(-1.f, 1.f)
+    };
+
+    openGLContext.extensions.glGenBuffers(1, &vertexBuffer);
+    openGLContext.extensions.glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    openGLContext.extensions.glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex2f) * 4, verts, GL_STATIC_DRAW);
+
+    glDisable(GL_DEPTH_TEST);
 }
 
 void MainComponent::shutdown()
 {
+    openGLContext.extensions.glDeleteBuffers(1, &vertexBuffer);
+
     // Free any GL objects created for rendering here.
-    shaderProgram.release();
+    if (isProgramReady)
+    {
+        shaderProgram->release();
+        delete shaderProgram;
+        shaderProgram = nullptr;
+    }
 }
 
 void MainComponent::render()
@@ -42,7 +79,20 @@ void MainComponent::render()
     OpenGLHelpers::clear (Colours::black);
 
     // Add your rendering code here...
-    shaderProgram.use();
+    if (isProgramReady)
+    {
+        shaderProgram->use();
+
+        GLint vertexPosition = openGLContext.extensions.glGetAttribLocation(shaderProgram->getProgramID(), "in_position");
+        openGLContext.extensions.glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+        openGLContext.extensions.glVertexAttribPointer(vertexPosition, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+        openGLContext.extensions.glEnableVertexAttribArray(vertexPosition);
+
+        GLint mixColorUniform = openGLContext.extensions.glGetUniformLocation(shaderProgram->getProgramID(), "mixColor");
+        openGLContext.extensions.glUniform3f(mixColorUniform, 0.f, 0.f, 1.f);
+
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    }
 }
 
 //==============================================================================
