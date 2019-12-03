@@ -1,0 +1,22 @@
+
+What can OpenGL do for us?
+
+Topics:
+
+- What is OpenGL
+
+	- Normalized Device Coordinates (NDC)
+
+- OpenGL and OS
+
+	- 
+
+- OpenGL and JUCE
+
+	- setOpenGLVersionRequired
+
+References:
+
+https://en.wikipedia.org/wiki/OpenGL
+https://prideout.net/modern-opengl-prezo/
+https://mesa3d.org/
